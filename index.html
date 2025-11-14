@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goodcom Printer SDK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        input[type="file"]::file-selector-button {
+            @apply bg-indigo-500 text-white font-semibold rounded-md py-1 px-3 border-none cursor-pointer hover:bg-indigo-600;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-4 md:p-8">
+<div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+    <h1 class="text-3xl font-bold text-gray-800 mb-4">Goodcom Printer SDK</h1>
+
+    <!-- Status Display -->
+    <div id="status" class="mb-4 p-3 rounded-md bg-gray-100 text-gray-700 font-mono text-sm break-words">&nbsp;</div>
+
+    <!-- Feature Testing Area -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- HTML Printing -->
+        <div class="space-y-3">
+            <h2 class="text-xl font-semibold mb-2">1. Print HTML</h2>
+            <textarea id="html-content" rows="4" class="w-full p-2 border rounded-md font-mono text-sm">
+            <div style="font-family: sans-serif; width: 300px; font-size: 18px; line-height: 1.5;"><!-- Store Name --><h1 style="text-align: center; font-size: 28px; margin: 0;">Delicious Restaurant</h1><p style="text-align: center; margin: 5px 0;">Welcome</p><p style="text-align: center; margin: 5px 0;">Order No: 1024</p><p style="text-align: left; margin: 5px 0;">Table No: A03</p>&lt;!-- Separator --&gt;
+                &lt;hr&gt;
+
+                &lt;!-- Item List --&gt;
+                &lt;p style="margin: 5px 0;"&gt;&lt;b&gt;Item Name&lt;/b&gt; &lt;span style="float: right;"&gt;&lt;b&gt;Price&lt;/b&gt;&lt;/span&gt;&lt;/p&gt;
+                &lt;p style="margin: 5px 0;"&gt;Braised Beef Noodles (x1) &lt;span style="float: right;"&gt;$28.00&lt;/span&gt;&lt;/p&gt;
+                &lt;p style="margin: 5px 0;"&gt;Cucumber Salad (x1) &lt;span style="float: right;"&gt;$8.00&lt;/span&gt;&lt;/p&gt;
+                &lt;p style="margin: 5px 0;"&gt;Spicy Wontons (x1) &lt;span style="float: right;"&gt;$12.00&lt;/span&gt;&lt;/p&gt;
+                &lt;p style="margin: 5px 0;"&gt;Coca-Cola (x2) &lt;span style="float: right;"&gt;$6.00&lt;/span&gt;&lt;/p&gt;
+
+                &lt;!-- Separator --&gt;
+                &lt;hr&gt;
+
+                &lt;!-- Totals --&gt;
+                &lt;p style="margin: 5px 0;"&gt;Subtotal &lt;span style="float: right;"&gt;$54.00&lt;/span&gt;&lt;/p&gt;
+                &lt;p style="margin: 5px 0;"&gt;Discount &lt;span style="float: right;"&gt;-$2.00&lt;/span&gt;&lt;/p&gt;
+                &lt;h2 style="margin: 5px 0; font-size: 22px;"&gt;&lt;b&gt;Total Due&lt;/b&gt; &lt;span style="float: right;"&gt;&lt;b&gt;$52.00&lt;/b&gt;&lt;/span&gt;&lt;/h2&gt;
+
+                &lt;!-- Separator --&gt;
+                &lt;hr&gt;
+
+                &lt;!-- Footer Info --&gt;
+                &lt;p style="text-align: left; margin: 5px 0;"&gt;Server: Jane D.&lt;/p&gt;
+                &lt;p style="text-align: left; margin: 5px 0;"&gt;Date: 11/14/2025 14:30 PM&lt;/p&gt;
+                &lt;p style="text-align: center; margin: 5px 0;"&gt;Thank you, please come again!&lt;/p&gt;
+                &lt;p style="text-align: center; margin: 5px 0;"&gt;Phone: 123-456-7890&lt;/p&gt;
+            </div>
+            </textarea>
+            <button id="btn-html" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-600">
+                Print HTML
+            </button>
+        </div>
+
+        <!-- PDF Printing -->
+        <div class="space-y-3">
+            <h2 class="text-xl font-semibold mb-2">2. Print PDF</h2>
+            <input type="file" id="pdf-file" accept=".pdf" class="w-full text-sm">
+            <button id="btn-pdf" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-600">
+                Print PDF File
+            </button>
+        </div>
+
+        <!-- Base64 Image Printing -->
+        <div class="space-y-3">
+            <h2 class="text-xl font-semibold mb-2">3. Print Image</h2>
+            <input type="file" id="image-file" accept="image/*" class="w-full text-sm">
+            <button id="btn-image" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-600">
+                Print Base64 Image
+            </button>
+            <p class="text-xs text-gray-500">Note: This reads the image file, converts it to Base64, and sends it.</p>
+        </div>
+
+    </div>
+</div>
+
+<!--
+  2. Load the SDK
+-->
+<!--<script src="../../dist/goodcom-printer-sdk.umd.cjs"></script>-->
+<script src="https://www.igoodcom.com/sdk/goodcom-printer-sdk.umd.cjs"></script>
+
+<!-- 3. Demo Logic -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const { GcPrinter } = window.GoodcomPrinterSDK;
+
+        const statusDiv = document.getElementById('status');
+
+        function updateStatus(message, isError = false) {
+            console.log(message);
+            statusDiv.textContent = message;
+            statusDiv.className = isError
+                ? 'mb-4 p-3 rounded-md bg-red-100 text-red-700 font-mono text-sm break-words'
+                : 'mb-4 p-3 rounded-md bg-blue-100 text-blue-700 font-mono text-sm break-words';
+        }
+
+        function checkPrinter() {
+            if (!GcPrinter) {
+                updateStatus('Error: SDK failed to initialize. Check console.', true);
+                return false;
+            }
+            return true;
+        }
+
+        // Print HTML
+        document.getElementById('btn-html').addEventListener('click', async () => {
+            if (!checkPrinter()) return;
+            const html = document.getElementById('html-content').value;
+            updateStatus('Sending HTML...');
+            try {
+                const msg = await GcPrinter.printHtml(html);
+                updateStatus(`HTML Print Success: ${msg}`);
+            } catch (e) {
+                updateStatus(`HTML Print Error: ${e.message}`, true);
+            }
+        });
+
+        // Print PDF
+        document.getElementById('btn-pdf').addEventListener('click', async () => {
+            if (!checkPrinter()) return;
+            const fileInput = document.getElementById('pdf-file');
+            const file = fileInput.files[0];
+            if (!file) {
+                updateStatus('Error: Please select a PDF file first.', true);
+                return;
+            }
+            updateStatus('Sending PDF file...');
+            try {
+                const msg = await GcPrinter.printPdf(file);
+                updateStatus(`PDF Print Success: ${msg}`);
+            } catch (e) {
+                updateStatus(`PDF Print Error: ${e.message}`, true);
+            }
+        });
+
+        // Print Base64 Image
+        document.getElementById('btn-image').addEventListener('click', () => {
+            if (!checkPrinter()) return;
+            const fileInput = document.getElementById('image-file');
+            const file = fileInput.files[0];
+            if (!file) {
+                updateStatus('Error: Please select an image file first.', true);
+                return;
+            }
+            updateStatus('Reading file and converting to Base64...');
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const base64String = e.target.result.split(',')[1];
+                    updateStatus('Sending Base64 Image string...');
+                    const msg = await GcPrinter.printBase64Image(base64String);
+                    updateStatus(`Image Print Success: ${msg}`);
+                } catch (e) {
+                    updateStatus(`Image Print Error: ${e.message}`, true);
+                }
+            };
+            reader.onerror = () => {
+                updateStatus('Error: Failed to read image file.', true);
+            };
+            reader.readAsDataURL(file); // Read as Data URL
+        });
+
+    });
+</script>
+</body>
+</html>

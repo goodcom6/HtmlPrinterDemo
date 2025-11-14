@@ -2,7 +2,13 @@
 
 This is a minimal HTML example demonstrating how to include and use the Goodcom Printer SDK via a `<script>` tag.
 
-This demo demonstrates how to directly import the printer SDK without using npm.If you are using npm, you can refer to [here](https://github.com/goodcom6/WebPrinterDemo-npm)
+This demo demonstrates how to directly import the printer SDK without using npm.If you are using npm, you can refer [here](https://github.com/goodcom6/WebPrinterDemo-npm)
+
+<p float="left">
+  <img src="images/demoUi.png" width="50%" />
+  <img src="images/Receipt.png" width="25%" />
+</p>
+
 ## How to Run
 
 1. **Ensure Printer Service is Running**: Make sure the Goodcom printer service is running on your pos.
